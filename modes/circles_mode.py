@@ -106,6 +106,10 @@ class Circle:
             r = int(base_color[0] * (1 - blend_factor) + dynamic_color[0] * blend_factor)
             g = int(base_color[1] * (1 - blend_factor) + dynamic_color[1] * blend_factor)
             b = int(base_color[2] * (1 - blend_factor) + dynamic_color[2] * blend_factor)
+            # Clamp color values to valid range
+            r = max(0, min(255, r))
+            g = max(0, min(255, g))
+            b = max(0, min(255, b))
             self.cached_color = (r, g, b)
             self.color_cache_frame = frame_counter
 
@@ -132,9 +136,12 @@ class Circle:
         if ENABLE_GLOW and self.glow_intensity > 0.15:
             glow_radius = int(self.radius * (1.0 + self.glow_intensity * 0.5))
             glow_alpha = int(alpha * self.glow_intensity * 0.3)
+            glow_alpha = max(0, min(255, glow_alpha))  # Clamp alpha to valid range
             if glow_alpha > 10:  # Only create surface if meaningful
                 glow_surf = pygame.Surface((glow_radius * 2 + 4, glow_radius * 2 + 4), pygame.SRCALPHA)
-                pygame.draw.circle(glow_surf, (*color[:3], glow_alpha),
+                # Use RGBA color tuple for SRCALPHA surface
+                glow_color = (*color, glow_alpha)
+                pygame.draw.circle(glow_surf, glow_color,
                                  (glow_radius + 2, glow_radius + 2), glow_radius)
                 screen.blit(glow_surf, (int(self.x - glow_radius - 2), int(self.y - glow_radius - 2)))
 
